@@ -5,9 +5,11 @@ import pandas as pd
 import textwrap
 from itertools import cycle
 
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg, NavigationToolbar2QT
-
-from PyQt4 import QtGui, QtCore
+from qtpy import QtGui, QtCore, QtWidgets, API
+if API == 'pyqt5':
+    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
+else:
+    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg, NavigationToolbar2QT
 
 from .util import FixedOrderFormatter, eng_format
 
@@ -30,7 +32,7 @@ class Linetrace(plt.Line2D):
         self.position = position
 
 
-class Linecut(QtGui.QDialog):
+class Linecut(QtWidgets.QDialog):
     def __init__(self, main=None):
         super(Linecut, self).__init__(None)
 
@@ -55,88 +57,88 @@ class Linecut(QtGui.QDialog):
         self.canvas.mpl_connect('button_press_event', self.on_press)
         self.toolbar = NavigationToolbar2QT(self.canvas, self)
 
-        hbox_export = QtGui.QHBoxLayout()
+        hbox_export = QtWidgets.QHBoxLayout()
 
-        self.cb_reset_cmap = QtGui.QCheckBox('Reset on plot')
+        self.cb_reset_cmap = QtWidgets.QCheckBox('Reset on plot')
         self.cb_reset_cmap.setCheckState(QtCore.Qt.Checked)
         hbox_export.addWidget(self.cb_reset_cmap)
 
-        self.b_save = QtGui.QPushButton('Copy data', self)
+        self.b_save = QtWidgets.QPushButton('Copy data', self)
         self.b_save.clicked.connect(self.on_data_to_clipboard)
         hbox_export.addWidget(self.b_save)
 
-        self.b_copy = QtGui.QPushButton('Copy figure', self)
+        self.b_copy = QtWidgets.QPushButton('Copy figure', self)
         self.b_copy.clicked.connect(self.on_figure_to_clipboard)
-        QtGui.QShortcut(QtGui.QKeySequence("Ctrl+C"),
+        QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+C"),
                         self, self.on_figure_to_clipboard)
         hbox_export.addWidget(self.b_copy)
 
-        self.b_to_ppt = QtGui.QPushButton('To PPT (Win)', self)
+        self.b_to_ppt = QtWidgets.QPushButton('To PPT (Win)', self)
         self.b_to_ppt.clicked.connect(self.on_to_ppt)
         hbox_export.addWidget(self.b_to_ppt)
 
-        self.b_save_dat = QtGui.QPushButton('Save data...', self)
+        self.b_save_dat = QtWidgets.QPushButton('Save data...', self)
         self.b_save_dat.clicked.connect(self.on_save)
         hbox_export.addWidget(self.b_save_dat)
 
-        self.b_toggle_info = QtGui.QPushButton('Toggle info')
+        self.b_toggle_info = QtWidgets.QPushButton('Toggle info')
         self.b_toggle_info.clicked.connect(self.on_toggle_datapoint_info)
         hbox_export.addWidget(self.b_toggle_info)
 
         # Linecuts
-        hbox_linecuts = QtGui.QHBoxLayout()
+        hbox_linecuts = QtWidgets.QHBoxLayout()
 
-        hbox_linecuts.addWidget(QtGui.QLabel('Linecuts'))
+        hbox_linecuts.addWidget(QtWidgets.QLabel('Linecuts'))
 
-        self.cb_incremental = QtGui.QCheckBox('Incremental')
+        self.cb_incremental = QtWidgets.QCheckBox('Incremental')
         self.cb_incremental.setCheckState(QtCore.Qt.Unchecked)
         hbox_linecuts.addWidget(self.cb_incremental)
 
-        hbox_linecuts.addWidget(QtGui.QLabel('Offset:'))
+        hbox_linecuts.addWidget(QtWidgets.QLabel('Offset:'))
 
-        self.le_offset = QtGui.QLineEdit('0', self)
+        self.le_offset = QtWidgets.QLineEdit('0', self)
         hbox_linecuts.addWidget(self.le_offset)
 
-        self.b_clear_lines = QtGui.QPushButton('Clear', self)
+        self.b_clear_lines = QtWidgets.QPushButton('Clear', self)
         self.b_clear_lines.clicked.connect(self.on_clear_lines)
         hbox_linecuts.addWidget(self.b_clear_lines)
 
         # Lines
-        hbox_style = QtGui.QHBoxLayout()
+        hbox_style = QtWidgets.QHBoxLayout()
 
-        hbox_style.addWidget(QtGui.QLabel('Line style'))
-        self.cb_linestyle = QtGui.QComboBox(self)
+        hbox_style.addWidget(QtWidgets.QLabel('Line style'))
+        self.cb_linestyle = QtWidgets.QComboBox(self)
         self.cb_linestyle.addItems(['None', 'solid', 'dashed', 'dotted'])
         hbox_style.addWidget(self.cb_linestyle)
 
-        hbox_style.addWidget(QtGui.QLabel('Linewidth'))
-        self.le_linewidth = QtGui.QLineEdit('0.5', self)
+        hbox_style.addWidget(QtWidgets.QLabel('Linewidth'))
+        self.le_linewidth = QtWidgets.QLineEdit('0.5', self)
         hbox_style.addWidget(self.le_linewidth)
 
         # Markers
-        hbox_style.addWidget(QtGui.QLabel('Marker style'))
-        self.cb_markerstyle = QtGui.QComboBox(self)
+        hbox_style.addWidget(QtWidgets.QLabel('Marker style'))
+        self.cb_markerstyle = QtWidgets.QComboBox(self)
         self.cb_markerstyle.addItems(['None', '.', 'o', 'x'])
         hbox_style.addWidget(self.cb_markerstyle)
 
-        hbox_style.addWidget(QtGui.QLabel('Size'))
-        self.le_markersize = QtGui.QLineEdit('0.5', self)
+        hbox_style.addWidget(QtWidgets.QLabel('Size'))
+        self.le_markersize = QtWidgets.QLineEdit('0.5', self)
         hbox_style.addWidget(self.le_markersize)
 
-        self.cb_include_z = QtGui.QCheckBox('Include Z')
+        self.cb_include_z = QtWidgets.QCheckBox('Include Z')
         self.cb_include_z.setCheckState(QtCore.Qt.Checked)
         hbox_style.addWidget(self.cb_include_z)
 
-        self.row_tree = QtGui.QTreeWidget(self)
+        self.row_tree = QtWidgets.QTreeWidget(self)
         self.row_tree.setHeaderLabels(['Parameter', 'Value'])
         self.row_tree.setColumnWidth(0, 100)
         self.row_tree.setHidden(True)
 
-        hbox_plot = QtGui.QHBoxLayout()
+        hbox_plot = QtWidgets.QHBoxLayout()
         hbox_plot.addWidget(self.canvas)
         hbox_plot.addWidget(self.row_tree)
 
-        layout = QtGui.QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.toolbar)
         layout.addLayout(hbox_plot)
         layout.addLayout(hbox_export)
@@ -202,7 +204,7 @@ class Linecut(QtGui.QDialog):
                 else:
                     val = eng_format(value, 1)
 
-                widgets.append(QtGui.QTreeWidgetItem(None, [name, val]))
+                widgets.append(QtWidgets.QTreeWidgetItem(None, [name, val]))
 
             self.row_tree.insertTopLevelItems(0, widgets)
 
@@ -246,7 +248,7 @@ class Linecut(QtGui.QDialog):
         self.fig.savefig(path, bbox_inches='tight')
 
         img = QtGui.QImage(path)
-        QtGui.QApplication.clipboard().setImage(img)
+        QtWidgets.QApplication.clipboard().setImage(img)
 
     def on_to_ppt(self):
         """ Some win32 COM magic to interact with powerpoint """
@@ -274,7 +276,7 @@ class Linecut(QtGui.QDialog):
             return
 
         path = os.path.dirname(os.path.realpath(__file__))
-        filename = QtGui.QFileDialog.getSaveFileName(self,
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,
                                                      'Save file',
                                                      path,
                                                      '.dat')
